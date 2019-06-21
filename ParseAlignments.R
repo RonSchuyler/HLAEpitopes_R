@@ -1,6 +1,8 @@
 
 
-alignments_zip_file <- "Alignments_Rel_3360.zip";
+# Original parser of AlleleImport.txt and AlleleImport2.txt padded with 0s.
+
+alignments_zip_file <- "../Alignments_Rel_3360.zip";
 filenames <- unzip(alignments_zip_file, list=TRUE);
 
 filenames
@@ -11,9 +13,12 @@ prot_files <- grep(pattern="_prot.txt$", x=filenames, value=TRUE);
 # SKip this one:  "alignments/ClassI_prot.txt" it is redunant with A, B, C, and less complete (as of version 3360).
 
 # Parse one protein alignment file. 
-parse_prot <- function(protfile="alignments/DPA1_prot.txt", zipfile="Alignments_Rel_3360.zip"){
+parse_prot <- function(protfile="alignments/DPA1_prot.txt", zipfile="../Alignments_Rel_3360.zip"){
 
-protfile="alignments/DPA1_prot.txt"; zipfile="Alignments_Rel_3360.zip"
+   
+# for testing:
+protfile="alignments/DPA1_prot.txt"; zipfile="../Alignments_Rel_3360.zip"
+protfile="alignments/DQA1_prot.txt"; zipfile="../Alignments_Rel_3360.zip"
 
 
    pf <- unz(description=zipfile, filename=protfile);
@@ -28,9 +33,18 @@ protfile="alignments/DPA1_prot.txt"; zipfile="Alignments_Rel_3360.zip"
 #     mode only (but text read operations on connections such as
 #     'readLines', 'scan' and 'source' work for any form of line ending).
    #pa <- read.table(pf);
-   while(readLines(pf){
+   alignment <- readLines(pf);
+   for(line_number in 1:length(alignment)){
+      aline <- alignment[line_number];
       # skip header info
-      # blank line
+      #  [1] "# file: DQA1_prot.txt"
+      # [2] "# date: 2019-04-17"
+      # [3] "# version: IPD-IMGT/HLA 3.36.0"
+      # [4] "# origin: http://hla.alleles.org/wmda/DQA1_prot.txt"
+      # [5] "# repository: https://raw.githubusercontent.com/ANHIG/IMGTHLA/Latest/alignments/DQA1_prot.txt"
+      # [6] "# author: WHO, Steven G. E. Marsh (steven.marsh.ac.uk)"
+      # blank line:
+      # [7] "                   "
       # get offset from line:  " Prot              -40                                         1"
       # skip lines with only pipes '|'
       # strip whitespace
@@ -78,10 +92,7 @@ protfile="alignments/DPA1_prot.txt"; zipfile="Alignments_Rel_3360.zip"
       # DPB1*935:01Q       ********* ********** ********** *****----- L------LRQ ECYAF----- ---------- -FV------- ---------- -DED------ 
       # DPB1*936:01Q       ********* ********** ********** *****--LF- --------.. .....----- --D..----- -FV------- ---------- -DE------- 
 
-
-
-
-   }
+   } # for each line in the alignment file
 }
 
 

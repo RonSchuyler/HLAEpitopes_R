@@ -1,8 +1,8 @@
 library(utils);
 library(gWidgets);
-library(gWidgetsRGtk2);       # Comment this out for my local mac version.
-options(guiToolkit="RGtk2");  # Comment this out for my local mac version.
-#options(guiToolkit="tcltk"); # UNcomment this out for my local mac version.
+#library(gWidgetsRGtk2);       # Comment this out for my local mac version.
+#options(guiToolkit="RGtk2");  # Comment this out for my local mac version.
+options(guiToolkit="tcltk"); # UNcomment this out for my local mac version.
 
 EpitopesVersion <- "1.5";
 lociOptions <- c("A","B","C","DPA1","DPB1","DQA1","DQB1","DRB1","DRB3","DRB4","DRB5");
