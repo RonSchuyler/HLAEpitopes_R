@@ -1,6 +1,11 @@
-
-
+#
+# ParseAlignments.R
+#
+#
+# Parse the archive of HLA allele alignments (Alignments_Rel_3360.zip) to replace loading from AlleleImport2.txt.
+#
 # Original parser of AlleleImport.txt and AlleleImport2.txt padded with 0s.
+#
 
 alignments_zip_file <- "../Alignments_Rel_3360.zip";
 filenames <- unzip(alignments_zip_file, list=TRUE);
