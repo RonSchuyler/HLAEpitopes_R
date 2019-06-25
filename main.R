@@ -11,6 +11,9 @@ source("patientMatrix.R"); # patient data frame, representation of file contents
 source("modules.R"); # module names, positions, counts, p-values...
 source("readfiles.R"); # allelesInFile
 
+library("tools"); # for file_path_sans_ext()
+
+
 # Class Analysis
 setClass("Analysis",
    representation(
@@ -89,8 +92,10 @@ Analysis <- function(
    this@seqMat <- get_hash_values_as_matrix(this@seqHash);
 
    if(is.list(positions) && length(positions) == 2){
-      inputFileName <- substr(dataFile,9,nchar(dataFile));
-      fileBaseName <- substr(inputFileName, 1, (nchar(inputFileName)-4));
+      #inputFileName <- substr(dataFile,9,nchar(dataFile));
+      #fileBaseName <- substr(inputFileName, 1, (nchar(inputFileName)-4));
+      inputFileName <- basename(dataFile);
+      fileBaseName <- file_path_sans_ext(inputFileName);
       #toFile <- sprintf("../output/%s_%s_pattern_%s.txt", fileBaseName, this@locus, paste(unlist(positions), collapse="."));
       timestamp <- format(Sys.time(), format="%Y.%m.%d.%H%M%S");
       toFile <- sprintf("../output/%s_%s_pattern_%s.txt", fileBaseName, this@locus, timestamp);
@@ -126,9 +131,11 @@ Analysis <- function(
                               #groupsOfN=groupsOfN);
 
    # Parse the input file name to build output file names, if necessary.
-   # Assume input filename is "../data/*.csv"
-   inputFileName <- substr(dataFile,9,nchar(dataFile));
-   fileBaseName <- substr(inputFileName, 1, (nchar(inputFileName)-4));
+   # Previous: Assume input filename is "../data/*.csv"; 6/25/19 Don't assume.
+   #inputFileName <- substr(dataFile,9,nchar(dataFile));
+   #fileBaseName <- substr(inputFileName, 1, (nchar(inputFileName)-4));
+   inputFileName <- basename(dataFile);
+   fileBaseName <- file_path_sans_ext(inputFileName);
    toClusterFile <- c();
    logFile <- c(); 
    if(is.null(groupsOfN)){
@@ -231,6 +238,7 @@ print("running");
    this;
 }
 
+# deprecated. This is not used. 
 getSeqMat <- function(locus="DRB1", dataFile="../data/mhc.csv", alleleFile="../AlleleImport.txt"){
    print("getSeqMat start");
    affectedPatients <- patientMatrix(dataFile=dataFile, control=FALSE);

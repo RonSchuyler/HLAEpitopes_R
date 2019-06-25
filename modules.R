@@ -1,4 +1,6 @@
+#
 # modules.R
+#
 
 # class modules
 setClass("modules",
@@ -7,6 +9,7 @@ setClass("modules",
 );
 
 # modules constructor
+# 6/25/19 this function is not currently used.
 modules <- function(
       affectedHash, controlHash, seqHash, positions, FDR, groupsOfN){
    stop("modules constructor is not used!");

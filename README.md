@@ -18,6 +18,9 @@ Alignments.zip
 In an R session, type:
 ```
 install.packages("gWidgets")
+install.packages("abind")
+install.packages("tools")
+
 ```
 
 for Windows:

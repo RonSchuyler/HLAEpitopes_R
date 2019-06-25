@@ -67,7 +67,8 @@ setMethod("loadDataMhc.csv", "patientMatrix", function(object){
       dx <- affectedDx;
    }
    # Indices of rows with this Dx.
-   rows <- grep(dx, mhc_table$Dx, fixed=TRUE);
+   #rows <- grep(dx, mhc_table$Dx, fixed=TRUE);
+   rows <- grep(dx, mhc_table$Dx, ignore.case=TRUE);
    object@dataMat <- mhc_table[rows,];
    object;
 })

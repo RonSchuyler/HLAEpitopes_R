@@ -1,4 +1,9 @@
+#
+# hla2.R
+# 
 
+# Use abind from multiple dimensional matrices.
+library("abind");
 
 
 # Check if any of the elements of the vector argument are different.
@@ -988,9 +993,6 @@ pairs <- function(whichFile="DR"){
    # keep in mind these are indexes, so the actual polypos is polypos[ppindex]
 }
 
-
-# Use abind from multiple dimensional matrices.
-library("abind");
 
 triples <- function(whichFile="DR"){
    AAstring <- "ACDEFGHIKLMNPQRSTVWY";
