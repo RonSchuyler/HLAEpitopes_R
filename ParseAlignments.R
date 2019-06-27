@@ -19,10 +19,17 @@ prot_files <- grep(pattern="_prot.txt$", x=filenames, value=TRUE);
 
 
 # Get a list (hash) of aligned 0-padded sequences keyed by alleleName,
-# given countHashes from get_allele_counts. Actual counts are not used,
-# the hash names are just used as a list of allele names to get.
-# see get_hash_values_as_matrix()
-get_padded_seqs_from_alignments <- function(affectedCounts, controlCounts, file_name="../Alignments.zip"){
+# given lists of allele names: affectedAlleles, controlAlleles (countHashes from get_allele_counts)
+# Actual counts are not used, the hash names are just used as a list of allele names to get.
+get_padded_seqs_from_alignments <- function(affectedAlleles, controlAlleles, zipfile="../Alignments.zip"){
+   alleleNames <- unique( c(names(affectedAlleles), names(controlAlleles)) );
+
+   locusToGet <- unique(sub("\\*.*$", replacement="", x=alleleNames)); # should only be one, but allow for multiple?
+
+   #protfile="alignments/DQA1_prot.txt"; zipfile="../Alignments_Rel_3360.zip"
+   protfile <- sprintf("alignments/%s_prot.txt", locusToGet);
+   pf <- unz(description=zipfile, filename=protfile);
+   alignment <- readLines(pf);
 
 }
 
@@ -33,7 +40,6 @@ parse_prot <- function(protfile="alignments/DPA1_prot.txt", zipfile="../Alignmen
    # for testing:
    protfile="alignments/DPA1_prot.txt"; zipfile="../Alignments_Rel_3360.zip"
    protfile="alignments/DQA1_prot.txt"; zipfile="../Alignments_Rel_3360.zip"
-
 
    pf <- unz(description=zipfile, filename=protfile);
    #  filename: a filename within a zip file.

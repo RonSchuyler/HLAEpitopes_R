@@ -7,12 +7,13 @@
 
 
  locus="DQA1"
- dataSet <-"../Data/aaT1DGCscrubbedhighresdata.csv" dataFile=dataSet;
+ dataSet <-"../Data/aaT1DGCscrubbedhighresdata.csv";
+ dataFile=dataSet;
   inputFileName <- substr(dataFile,9,nchar(dataFile));
   fileBaseName <- substr(inputFileName, 1, (nchar(inputFileName)-4));
 
 
- positions <- "8:85"
+ positions <- "8:25"
  positionsTextbox <- eval(parse(text=positions))
    a <- Analysis(locus=locus, dataFile=dataSet, positions=positionsTextbox, 
       FDR=0.05, groupsOfN=2, doCluster=FALSE,  outputToScreen=FALSE,
