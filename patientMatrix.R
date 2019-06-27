@@ -1,5 +1,5 @@
 # patientMatrix.R
-# The patientMatrix class holds data read directly from a file.
+# The patientMatrix class holds data read directly from a file, listing patients, their alleles, and diagnosis.
 # 
 
 source("hla3.R");

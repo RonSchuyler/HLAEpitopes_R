@@ -17,26 +17,35 @@ prot_files <- grep(pattern="_prot.txt$", x=filenames, value=TRUE);
 
 # SKip this one:  "alignments/ClassI_prot.txt" it is redunant with A, B, C, and less complete (as of version 3360).
 
+
+# Get a list (hash) of aligned 0-padded sequences keyed by alleleName,
+# given countHashes from get_allele_counts. Actual counts are not used,
+# the hash names are just used as a list of allele names to get.
+# see get_hash_values_as_matrix()
+get_padded_seqs_from_alignments <- function(affectedCounts, controlCounts, file_name="../Alignments.zip"){
+
+}
+
 # Parse one protein alignment file. 
 parse_prot <- function(protfile="alignments/DPA1_prot.txt", zipfile="../Alignments_Rel_3360.zip"){
 
    
-# for testing:
-protfile="alignments/DPA1_prot.txt"; zipfile="../Alignments_Rel_3360.zip"
-protfile="alignments/DQA1_prot.txt"; zipfile="../Alignments_Rel_3360.zip"
+   # for testing:
+   protfile="alignments/DPA1_prot.txt"; zipfile="../Alignments_Rel_3360.zip"
+   protfile="alignments/DQA1_prot.txt"; zipfile="../Alignments_Rel_3360.zip"
 
 
    pf <- unz(description=zipfile, filename=protfile);
    #  filename: a filename within a zip file.
    #  description:
-#     'unz' reads (only) single files within zip files, in binary mode.
-#     The description is the full path to the zip file, with '.zip'
-#     extension if required.
+   #     'unz' reads (only) single files within zip files, in binary mode.
+   #     The description is the full path to the zip file, with '.zip'
+   #     extension if required.
 
-# For file-like connections on Windows,
-#     translation of line endings (between LF and CRLF) is done in text
-#     mode only (but text read operations on connections such as
-#     'readLines', 'scan' and 'source' work for any form of line ending).
+   # For file-like connections on Windows,
+   #     translation of line endings (between LF and CRLF) is done in text
+   #     mode only (but text read operations on connections such as
+   #     'readLines', 'scan' and 'source' work for any form of line ending).
    #pa <- read.table(pf);
    alignment <- readLines(pf);
    for(line_number in 1:length(alignment)){
