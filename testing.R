@@ -57,11 +57,18 @@ slotNames(affectedPatients)
 # see get_padded_seqs()
 
 
-modules:
+#modules:
 #moduleCountHash(controlPatients, locus, posV=posSet, seqMat); # this will skip a module containing 0's; OK
 #fixClusterCounts(clusterSet, apm=affectedPatients@dataMat, cpm=controlPatients@dataMat, posV=posSet, seqHash=seqHash);
 # fixClusterCounts() is ok because no modules sent to it from moduleCountHash() will include 0
 #which_has_module(module=allModules[rowi,1], posV=allModules[rowi,2], seq_mat=seqMat)
 #which_has_module() is ok because no modules sent to it from moduleCountHash() will include 0
 
+aline=" DQA1*01:01:01:01         MIL NKALLLGALA ";
 
+for(ln in 1:11){
+   aline <- alignment[ln];
+    spl <- unlist(strsplit(aline, split=" "));
+   alleleName <- spl[2];
+   sequence <- paste(spl[3:length(spl)], collapse="");
+}
