@@ -38,7 +38,7 @@ parse_prot <- function(protfile="alignments/DPA1_prot.txt", zipfile="../Alignmen
 
    
    # for testing:
-   protfile="alignments/DPA1_prot.txt"; zipfile="../Alignments_Rel_3360.zip"
+   #protfile="alignments/DPA1_prot.txt"; zipfile="../Alignments_Rel_3360.zip"
    protfile="alignments/DQA1_prot.txt"; zipfile="../Alignments_Rel_3360.zip"
 
    pf <- unz(description=zipfile, filename=protfile);
