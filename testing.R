@@ -29,10 +29,8 @@ controlPatients    <- patientMatrix(dataFile=a@dataFile, control=TRUE);
 affectedPatients <- trimToLocus(affectedPatients, locus);
 controlPatients <- trimToLocus(controlPatients, locus);
 
-affectedAlleles <- alleleCountHash(affectedPatients,
-                                                   locus=locus);
-controlAlleles <- alleleCountHash(controlPatients,
-                                                   locus=locus);
+affectedAlleles <- alleleCountHash(affectedPatients, locus=locus);
+controlAlleles <- alleleCountHash(controlPatients, locus=locus);
 
 
 
@@ -53,8 +51,12 @@ slotNames(affectedPatients)
 # TODO:
 # need to check doPatternAnalysis()
 # add all loci in alignments?
-# ParseAlignments : build seqHash, replace *->0, .->0, - -> reference
+# ParseAlignments : build seqHash, replace *->0, .->0, - -> reference   DONE
 # see get_padded_seqs()
+
+seqHashNEW <- get_padded_seqs_from_alignments(affectedAlleles, controlAlleles, zipfile="../Alignments.zip");
+seqMatNEW <- get_hash_values_as_matrix(seqHashNEW);
+
 
 
 #modules:

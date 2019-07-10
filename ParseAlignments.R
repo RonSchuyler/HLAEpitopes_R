@@ -59,11 +59,13 @@ parse_prot_line <- function(aline=" DQA1*01:01:01:01         MIL NKALLLGALA "){
 # need to change:
 # replace '-' with amino acid from reference allele
 # * -> 0
-# . -> 0  OR cut it out
+# . -> 0 (if collapseDots==FALSE)   OR  cut it out (if collapseDots==TRUE)
+# X -> 0
 # Check for truncated alleles:
 # allAllelesList[["DQA1*05:15N"]]   "****************************-----Y------S---------------Q-----G----GVCLFSDNLD.LTRNLHX"
-# X -> 0
 # and pad the end with 0 so all have same length
+# allAllelesList keys are allele names
+# allAllelesList values are character strings
 padAllAlleles_andFillFromRef <- function(allAllelesList, ref_allele_name, collapseDots=TRUE){
    ref_seq <- allAllelesList[[ref_allele_name]];
    maxLen <- nchar(ref_seq);
@@ -84,6 +86,8 @@ padAllAlleles_andFillFromRef <- function(allAllelesList, ref_allele_name, collap
          # pad the end
          zeroseq <- sprintf("%s%s", zeroseq, paste(rep("0", (maxLen-nchar(zeroseq))), collapse=""));
       }
+# TODO: need to check lengths? 
+# TODO: need to handle '.' in reference sequence; if we're collapsing dots in ref, below would be off, no?
 
       # Fill from ref: replace '-' with amino acid from reference allele.
       zz <- unlist(strsplit(zeroseq, split=""));
@@ -93,8 +97,13 @@ padAllAlleles_andFillFromRef <- function(allAllelesList, ref_allele_name, collap
          zeroseq <- paste(zz, collapse="");
       }
        
-      allAllelesList[[alleleName]] <- zeroseq;
+      #allAllelesList[[alleleName]] <- zeroseq;
+      # Split string into individual characters
+      allAllelesList[[alleleName]] <- unlist(strsplit(zeroseq, split=""));
    }
+   # TODO: need to handle '.' in reference sequence
+   # Also split reference seqeunce
+   allAllelesList[[ref_allele_name]] <- unlist(strsplit(ref_seq, split=""));
    return(allAllelesList);
 }
 
