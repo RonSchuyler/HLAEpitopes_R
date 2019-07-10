@@ -54,6 +54,18 @@ parse_prot_line <- function(aline=" DQA1*01:01:01:01         MIL NKALLLGALA "){
    return(ret);
 }
 
+checkLength <- function( allAllelesList, ref_allele_name){
+   maxLen <- 0;
+   for(key in names(allAllelesList)){
+      value <- allAllelesList[[key]];
+      print(sprintf("%s :: %i", key, nchar(value)), q=F);
+      if(nchar(value) > maxLen){
+         maxLen <- nchar(value);
+      }
+   }
+
+}
+
 
 # padAllAlleles_andFillFromRef()
 # need to change:
@@ -125,8 +137,10 @@ get_padded_seqs_from_alignments <- function(affectedAlleles, controlAlleles, zip
    protfile <- sprintf("alignments/%s_prot.txt", locusToGet);
    pf <- unz(description=zipfile, filename=protfile);
    alignment <- readLines(pf);
+   close(pf);
 
    protline <- unlist(strsplit(alignment[8], split=""))
+   # TODO: need to get offset
    refline <- unlist(strsplit(alignment[10], split=""))
    startPos_line <- length(protline);
    startPos_line <- nchar(alignment[8]);
@@ -135,7 +149,7 @@ get_padded_seqs_from_alignments <- function(affectedAlleles, controlAlleles, zip
   
    space_split_ref <- unlist(strsplit(alignment[10], split=" "));
    ref_allele_name <- space_split_ref[2];
-   ref_line_numbers <- grep(ref_allele_name, alignment, fixed=TRUE);
+   #ref_line_numbers <- grep(ref_allele_name, alignment, fixed=TRUE); # unused
 
    for(line_number in 1:length(alignment)){
       aline <- alignment[line_number];
@@ -157,6 +171,7 @@ get_padded_seqs_from_alignments <- function(affectedAlleles, controlAlleles, zip
          allAllelesList[[newName]] <- newSeq;
       }
    }
+   # TODO: need to check offset 
    allAllelesList <- padAllAlleles_andFillFromRef(allAllelesList, ref_allele_name);
    return(allAllelesList);
 }

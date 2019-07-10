@@ -55,6 +55,7 @@ slotNames(affectedPatients)
 # see get_padded_seqs()
 
 seqHashNEW <- get_padded_seqs_from_alignments(affectedAlleles, controlAlleles, zipfile="../Alignments.zip");
+allAllelesList <- get_padded_seqs_from_alignments(affectedAlleles, controlAlleles, zipfile="../Alignments.zip");
 seqMatNEW <- get_hash_values_as_matrix(seqHashNEW);
 
 
