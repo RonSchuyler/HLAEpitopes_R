@@ -205,6 +205,12 @@ get_padded_seqs_from_alignments <- function(affectedAlleles, controlAlleles, col
          next;
       }
       newName <- names(newProt);
+      if(!(newName %in% alleleNames) && newName != ref_allele_name){
+         # only get alleles in the current data set.
+         # this requires an exact match.
+         # TODO: ? Many want to get for DRB1*07:01 use DRB1*07:01:01:01 ?
+         next;
+      }
       newSeq <- newProt[[newName]];
       if( length(grep(locusToGet, newName, fixed=TRUE)) == 0 &&
          newName != ref_allele_name){ # allow DRB1*01:01:01 for DRB_prot.txt. It is the reference for DRB3,4,5 also.
