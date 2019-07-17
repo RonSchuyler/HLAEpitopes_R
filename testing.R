@@ -7,13 +7,14 @@
 
 
  locus="DQA1"
+ locus="DRB1"
  dataSet <-"../Data/aaT1DGCscrubbedhighresdata.csv";
  dataFile=dataSet;
   inputFileName <- substr(dataFile,9,nchar(dataFile));
   fileBaseName <- substr(inputFileName, 1, (nchar(inputFileName)-4));
 
 
- positions <- "8:25"
+ positions <- "45:53"
  positionsTextbox <- eval(parse(text=positions))
    a <- Analysis(locus=locus, dataFile=dataSet, positions=positionsTextbox, 
       FDR=0.05, groupsOfN=2, doCluster=FALSE,  outputToScreen=FALSE,
@@ -36,8 +37,7 @@ controlAlleles <- alleleCountHash(controlPatients, locus=locus);
 
    alleleFile <- "../AlleleImport2.txt";
 
-   seqHash <- get_padded_seqs(affectedAlleles, controlAlleles,
-                                                         file_name=alleleFile);
+   seqHash <- get_padded_seqs(affectedAlleles, controlAlleles, file_name=alleleFile);
    seqMat <- get_hash_values_as_matrix(seqHash);
 
 
@@ -75,3 +75,21 @@ for(ln in 1:11){
    alleleName <- spl[2];
    sequence <- paste(spl[3:length(spl)], collapse="");
 }
+
+
+
+# finding closest matching allele: eg DRB1*07:01 -> use DRB1*07:01:01:01  ?
+
+#"DRB1\*07:01" DRB_prot.txt | awk -F" " '{print $1}'|sort -u| awk '{printf "\"%s\", ", $1}'
+d07 <- c("DRB1*07:01:01:01", "DRB1*07:01:01:02", "DRB1*07:01:01:03", "DRB1*07:01:01:04", "DRB1*07:01:02", "DRB1*07:01:03", "DRB1*07:01:04", "DRB1*07:01:05", "DRB1*07:01:06", "DRB1*07:01:07", "DRB1*07:01:08", "DRB1*07:01:09", "DRB1*07:01:10", "DRB1*07:01:11", "DRB1*07:01:12", "DRB1*07:01:13", "DRB1*07:01:14", "DRB1*07:01:15", "DRB1*07:01:16", "DRB1*07:01:17", "DRB1*07:01:18", "DRB1*07:01:19", "DRB1*07:01:20", "DRB1*07:01:21", "DRB1*07:01:22")
+d07 <- c("DRB1*07:01:01:01", "DRB1*07:01:01:02", "DRB1*07:01:01:03", "DRB1*07:01:01:04", "DRB1*07:01:02", "DRB1*07:01:03", "DRB1*07:01:04", "DRB1*07:01:05", "DRB1*07:01:06", "DRB1*07:01:07", "DRB1*07:01:08", "DRB1*07:01:09", "DRB1*07:01:10", "DRB1*07:01:11", "DRB1*07:01:12", "DRB1*07:01:13", "DRB1*07:01:14", "DRB1*07:01:15", "DRB1*07:01:16", "DRB1*07:01:17", "DRB1*07:01:18", "DRB1*07:01:19", "DRB1*07:01:20", "DRB1*07:01:21", "DRB1*07:01:22", "DRB1*07:03", "DRB1*07:04", "DRB1*07:05", "DRB1*07:06", "DRB1*07:07", "DRB1*07:08", "DRB1*07:09");
+
+
+ds <- "DRB1*07:01"
+
+ds %in% d07
+
+grep(ds, d07, fixed=TRUE)
+
+# see "not found" in patientMatrix.R
+

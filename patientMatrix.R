@@ -368,8 +368,7 @@ setMethod("moduleCountHash", "patientMatrix",
 
 # patientMatrix countPatients
 # Count patients and fill this@patientCount.  
-# Verify each allele exists in the sequence matrix (which is built from
-# the official allele file (../AlleleImport.txt)).
+# Verify each allele exists in the sequence matrix (which is now built from Alignments.zip) 
 # this@allOrNone controls how patients are counted.
 # If allOrNone=TRUE, if a patient has any untyped, missing or ambiguous 
 # alleles, all alleles for that patient are ignored.  

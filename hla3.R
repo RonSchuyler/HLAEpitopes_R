@@ -187,7 +187,9 @@ print_allele_counts_copd <- function(loci="DR"){
 # given countHashes from get_allele_counts.  Actual counts are not used,
 # the hash names are just used as a list of allele names to get.
 # see get_hash_values_as_matrix()
+# depricated. replaced with ParseAlignments.R:get_padded_seqs_from_alignments()
 get_padded_seqs <- function(affectedCounts, controlCounts, file_name="../AlleleImport.txt"){
+   stop("get_padded_seqs() from AlleleImport.txt is no longer supported.");
    #print(sprintf("get_padded_seqs: %s", file_name));
    alleleNames <- union(names(affectedCounts), names(controlCounts));
    fileHandle <- file(file_name, open="r");

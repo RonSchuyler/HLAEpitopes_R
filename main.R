@@ -10,6 +10,7 @@ setClassUnion("NumOrNULLOrList", c("numeric", "NULL", "list"));
 source("patientMatrix.R"); # patient data frame, representation of file contents
 source("modules.R"); # module names, positions, counts, p-values...
 source("readfiles.R"); # allelesInFile
+source("ParseAlignments.R"); # for get_padded_seqs_from_alignments()
 
 library("tools"); # for file_path_sans_ext()
 
@@ -52,15 +53,20 @@ Analysis <- function(
       outputToFile=FALSE,
       printAllelesWithModules=FALSE,
       awmToFile=FALSE,
+      collapseDots=FALSE,
       uiStatusString="[error...arrrgh...]",
       a.version="0"
       ){
    #print("Analysis contstuctor");
 
    # Create the new object.
-   this <- new("Analysis", locus=locus, dataFile=dataFile, positions=positions,
-                                                                     FDR=FDR);
+   this <- new("Analysis", locus=locus, dataFile=dataFile, positions=positions, FDR=FDR);
    this@uiStatusString <- c("Running 1");
+   if(collapseDots){
+      collapseDotsString <- "_NoGaps";
+   } else{
+      collapseDotsString <- "_aligned";
+   }
 
    # Read the data file into affected and control patient matrices.
    this@affectedPatients <- patientMatrix(dataFile=dataFile, control=FALSE);
@@ -78,17 +84,19 @@ Analysis <- function(
    #else{
       # Get affected and control allele frequencies as hash lists.
       # Used below to get the padded sequences list.
-      this@affectedAlleles <- alleleCountHash(this@affectedPatients, 
-                                                   locus=this@locus);
-      this@controlAlleles <- alleleCountHash(this@controlPatients, 
-                                                   locus=this@locus);
+      this@affectedAlleles <- alleleCountHash(this@affectedPatients, locus=this@locus);
+      this@controlAlleles <- alleleCountHash(this@controlPatients, locus=this@locus);
    #}
 
    # This is the alleles file with sequence data for each allele.
-   alleleFile <- "../AlleleImport2.txt";
+   #alleleFile <- "../AlleleImport2.txt";
    # Get hash and matrix of aligned padded sequences.
-   this@seqHash <- get_padded_seqs(this@affectedAlleles, this@controlAlleles,
-                                                         file_name=alleleFile);
+   #this@seqHash <- get_padded_seqs(this@affectedAlleles, this@controlAlleles, file_name=alleleFile);
+
+   # This is the alleles alignment file with aligned sequence data for each allele.
+   alignmentsFile <- "../Alignments.zip";
+   this@seqHash <- get_padded_seqs_from_alignments(this@affectedAlleles, this@controlAlleles, collapseDots=collapseDots, zipfile=alignmentsFile);
+
    this@seqMat <- get_hash_values_as_matrix(this@seqHash);
 
    if(is.list(positions) && length(positions) == 2){
@@ -98,7 +106,7 @@ Analysis <- function(
       fileBaseName <- file_path_sans_ext(inputFileName);
       #toFile <- sprintf("../output/%s_%s_pattern_%s.txt", fileBaseName, this@locus, paste(unlist(positions), collapse="."));
       timestamp <- format(Sys.time(), format="%Y.%m.%d.%H%M%S");
-      toFile <- sprintf("../output/%s_%s_pattern_%s.txt", fileBaseName, this@locus, timestamp);
+      toFile <- sprintf("../output/%s_%s_pattern%s_%s.txt", fileBaseName, this@locus, collapseDotsString, timestamp);
       toFile <- gsub("^","not",toFile,fixed=TRUE);
       toFile <- gsub("[","",toFile,fixed=TRUE);
       toFile <- gsub("]","",toFile,fixed=TRUE);
@@ -159,7 +167,7 @@ print("running");
       # All modules output will go to this file.
       #toFile <- sprintf("../output/%s_%s_output%sof%s.txt", fileBaseName, this@locus, gon, pos);
       timestamp <- format(Sys.time(), format="%Y.%m.%d.%H%M%S");
-      toFile <- sprintf("../output/%s_%s_output%s_%s.txt", fileBaseName, this@locus, gon, timestamp);
+      toFile <- sprintf("../output/%s_%s_output%s%s_%s.txt", fileBaseName, this@locus, gon, collapseDotsString, timestamp);
       if(awmToFile){
          # This includes all variable positions in file name.
          #awmFileName <- sprintf("../output/AWM_%s_%s_output%sof%s.txt", fileBaseName, this@locus, gon, pos);
@@ -195,8 +203,7 @@ print("running");
    #skippedAllelesFile <- sprintf("../output/%s_SkippedAlleles_%s.txt", 
    #   fileBaseName, this@locus);
    timestamp <- format(Sys.time(), format="%Y.%m.%d.%H%M%S");
-   logFile <- sprintf("../output/%s_%s_output%s_%s.log", fileBaseName,
-         this@locus, gon, timestamp);
+   logFile <- sprintf("../output/%s_%s_output%s_%s.log", fileBaseName, this@locus, gon, timestamp);
 
    logToFile(logFile, logmessage=sprintf("HLA Epitopes version %s", a.version), firsttime=TRUE);
    # Log the name of the input data file, the locus, and the allele file used.

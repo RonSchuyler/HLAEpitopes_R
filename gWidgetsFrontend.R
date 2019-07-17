@@ -4,8 +4,11 @@ library(gWidgets);
 #options(guiToolkit="RGtk2");  # Comment this out for my local mac version.
 options(guiToolkit="tcltk"); # UNcomment this out for my local mac version.
 
-EpitopesVersion <- "1.5";
-lociOptions <- c("A","B","C","DPA1","DPB1","DQA1","DQB1","DRB1","DRB3","DRB4","DRB5");
+EpitopesVersion <- "3";
+#lociOptions <- c("A","B","C","DPA1","DPB1","DQA1","DQB1","DRB1","DRB3","DRB4","DRB5");
+# ls -1 *_prot.txt|awk -F_ '{printf "\"%s\", ",$1}' 
+# Then add DRB1,3,4,5
+lociOptions <- c("A", "B", "C", "DMA", "DMB", "DOA", "DOB", "DPA1", "DPB1", "DQA1", "DQB1", "DRA", "DRB1","DRB3","DRB4","DRB5", "E", "F", "G", "HFE", "MICA", "MICB", "TAP1", "TAP2");
 
 source("main.R");
 
@@ -45,6 +48,8 @@ addSpace(group, 10, horizontal=FALSE);
 sigLabel <- glabel("Significance threshold", container=group);
 sigBox <- gedit("0.05", container=group);
 
+addSpace(group, 10, horizontal=FALSE);
+allowGappedAlignmentCheckbox <- gcheckbox("Allow gapped allele alignment", container=group, checked=FALSE);
 #gstatusbar
 #addSpace
 #gpanedgroup
@@ -140,6 +145,7 @@ gofunction <- function(){
       printAllelesWithModules=FALSE,
       #printAllelesWithModules=(svalue(toScreen) && svalue(allelesWithModulesCheckbox)),
       awmToFile=svalue(allelesWithModulesCheckbox),
+      collapseDots=!svalue(allowGappedAlignmentCheckbox),
       a.version=EpitopesVersion);
    #print(a@moduleSet@moduleFrame);
 

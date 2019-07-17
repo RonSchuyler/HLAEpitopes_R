@@ -206,7 +206,8 @@ printModules <- function(
       if(printAllelesWithModules || awmToFile){
          # Add alleles containing each module.
          print("write output, include allelesWithModules", q=F);
-         modulesWithAlleles <- cbind(allModules, ""); 
+         #modulesWithAlleles <- cbind(allModules, ""); 
+         modulesWithAlleles <- cbind(allModules, Alleles=""); 
          newcoli <- ncol(modulesWithAlleles);
          for(rowi in 1:nrow(allModules)){
             #an_allele <- which_has_module(module=allModules[rowi,1], posV=allModules[rowi,2], seq_mat=seqMat);

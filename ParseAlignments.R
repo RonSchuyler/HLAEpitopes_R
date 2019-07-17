@@ -24,7 +24,8 @@
 # Return a single-element list containing sequence data from this line, named with alleleName:
 # ret[[alleleName]] "MILNKALLLGALA"
 # OR NULL if aline is comment, blank. 
-parse_prot_line <- function(aline=" DQA1*01:01:01:01         MIL NKALLLGALA "){
+# offset is characters from the start of the line, or 0 to ignore.
+parse_prot_line <- function(aline=" DQA1*01:01:01:01         MIL NKALLLGALA ", offset=0){
    if(length(grep("^#", aline)) > 0){
       # # comment line
       return(c());
@@ -33,7 +34,6 @@ parse_prot_line <- function(aline=" DQA1*01:01:01:01         MIL NKALLLGALA "){
       # Please see http://hla.alleles.org/terms.html for terms of use.
       return(c());
    }
-
 
    spl <- unlist(strsplit(aline, split=" "));
    alleleName <- spl[2];
@@ -48,7 +48,13 @@ parse_prot_line <- function(aline=" DQA1*01:01:01:01         MIL NKALLLGALA "){
       return(c());
    }
 
-   sequence <- paste(spl[3:length(spl)], collapse="");
+   if(offset == 0){
+      sequence <- paste(spl[3:length(spl)], collapse="");
+   } else{
+      aline_vec <- unlist(strsplit(aline, split=""));
+      sequence <- paste(aline_vec[offset:length(aline_vec)], collapse="");
+      sequence <- gsub(pattern=" ", replacement="", x=sequence, fixed=TRUE);
+   }
    ret <- list(sequence);
    names(ret) <- alleleName;
    return(ret);
@@ -63,59 +69,74 @@ checkLength <- function( allAllelesList, ref_allele_name){
          maxLen <- nchar(value);
       }
    }
-
 }
 
-
-# padAllAlleles_andFillFromRef()
-# need to change:
+# 1. 
+# fillFromRef()
+# (must be done prior to rmDots(), or alignment will be off)
 # replace '-' with amino acid from reference allele
-# * -> 0
-# . -> 0 (if collapseDots==FALSE)   OR  cut it out (if collapseDots==TRUE)
-# X -> 0
-# Check for truncated alleles:
-# allAllelesList[["DQA1*05:15N"]]   "****************************-----Y------S---------------Q-----G----GVCLFSDNLD.LTRNLHX"
-# and pad the end with 0 so all have same length
+# Values for allAllelesList on input and output are character strings: "MILNK..."
 # allAllelesList keys are allele names
-# allAllelesList values are character strings
-padAllAlleles_andFillFromRef <- function(allAllelesList, ref_allele_name, collapseDots=TRUE){
+fillFromRef <- function(allAllelesList, ref_allele_name){
    ref_seq <- allAllelesList[[ref_allele_name]];
-   maxLen <- nchar(ref_seq);
+   # maxLen <- nchar(ref_seq); unused
    ref_seq_chars <- unlist(strsplit(ref_seq, split=""));
    for(alleleName in names(allAllelesList)){
       if(alleleName == ref_allele_name){
          next;
       }
       aseq <- allAllelesList[[alleleName]];
-      zeroseq <- gsub(pattern="*", replacement="0", x=aseq, fixed=TRUE);
+
+      # Fill from ref: replace '-' with amino acid from reference allele.
+      zz <- unlist(strsplit(aseq, split=""));
+      wdash <- which(zz == "-");
+      if(length(wdash) > 0){
+         zz[wdash] <- ref_seq_chars[wdash];
+         aseq <- paste(zz, collapse="");
+      }
+      allAllelesList[[alleleName]] <- aseq;
+   }
+   return(allAllelesList);
+}
+
+# 2.
+# rmDotsX()
+# . -> 0 (if collapseDots==FALSE)   OR  cut it out (if collapseDots==TRUE)
+# * -> 0
+# X -> 0
+# Values for allAllelesList on input are character strings: "MILNK..."
+# Values for allAllelesList on output are character vectors:  "M" "I" "L" "N" "K"
+# allAllelesList keys are allele names
+rmDotsX_and0pad <- function(allAllelesList, collapseDots=TRUE){
+   maxLen <- 0;
+   # 1st pass: may change string lengths, so just track longest
+   for(alleleName in names(allAllelesList)){
+      aseq <- allAllelesList[[alleleName]];
+      zeroseq <- gsub(pattern="*", replacement="0", x=aseq, fixed=TRUE); # replace '*'
+      zeroseq <- gsub(pattern="X", replacement="0", x=zeroseq, fixed=TRUE); # remove stop codon 'X'
       if(collapseDots){
          zeroseq <- gsub(pattern=".", replacement="", x=zeroseq, fixed=TRUE);
       }else{
          zeroseq <- gsub(pattern=".", replacement="0", x=zeroseq, fixed=TRUE);
       }
-      zeroseq <- gsub(pattern="X", replacement="0", x=zeroseq, fixed=TRUE); # remove stop codon 'X'
-      if(nchar(zeroseq) < maxLen){
-         # pad the end
-         zeroseq <- sprintf("%s%s", zeroseq, paste(rep("0", (maxLen-nchar(zeroseq))), collapse=""));
+      if(nchar(zeroseq) > maxLen){
+         maxLen <- nchar(zeroseq);
       }
-# TODO: need to check lengths? 
-# TODO: need to handle '.' in reference sequence; if we're collapsing dots in ref, below would be off, no?
+      allAllelesList[[alleleName]] <- zeroseq;
+   } # 1st pass
 
-      # Fill from ref: replace '-' with amino acid from reference allele.
-      zz <- unlist(strsplit(zeroseq, split=""));
-      wdash <- which(zz == "-");
-      if(length(wdash) > 0){
-         zz[wdash] <- ref_seq_chars[wdash];
-         zeroseq <- paste(zz, collapse="");
+   # 2nd pass: 
+   #    pad the ends with 0's
+   #    expand character strings to vectors
+   for(alleleName in names(allAllelesList)){
+      aseq <- allAllelesList[[alleleName]];
+      if(nchar(aseq) < maxLen){
+         # pad the end
+         aseq <- sprintf("%s%s", aseq, paste(rep("0", (maxLen-nchar(aseq))), collapse=""));
       }
-       
-      #allAllelesList[[alleleName]] <- zeroseq;
       # Split string into individual characters
-      allAllelesList[[alleleName]] <- unlist(strsplit(zeroseq, split=""));
-   }
-   # TODO: need to handle '.' in reference sequence
-   # Also split reference seqeunce
-   allAllelesList[[ref_allele_name]] <- unlist(strsplit(ref_seq, split=""));
+      allAllelesList[[alleleName]] <- unlist(strsplit(aseq, split=""));
+   } # 2nd pass
    return(allAllelesList);
 }
 
@@ -127,23 +148,34 @@ padAllAlleles_andFillFromRef <- function(allAllelesList, ref_allele_name, collap
 # zipfile from: 
 #   curl -O ftp://ftp.ebi.ac.uk/pub/databases/ipd/imgt/hla/Alignments_Rel_3360.zip
 #   ln -s Alignments_Rel_3360.zip Alignments.zip
-get_padded_seqs_from_alignments <- function(affectedAlleles, controlAlleles, zipfile="../Alignments.zip"){
+get_padded_seqs_from_alignments <- function(affectedAlleles, controlAlleles, collapseDots=TRUE, zipfile="../Alignments.zip"){
    allAllelesList <- list();
    alleleNames <- unique( c(names(affectedAlleles), names(controlAlleles)) );
 
    locusToGet <- unique(sub("\\*.*$", replacement="", x=alleleNames)); # should only be one, but allow for multiple?
 
    #protfile="alignments/DQA1_prot.txt"; zipfile="../Alignments_Rel_3360.zip"
-   protfile <- sprintf("alignments/%s_prot.txt", locusToGet);
+   #protfile="alignments/DRB_prot.txt"; zipfile="../Alignments_Rel_3360.zip"
+   # In the alignments files, DRB1,3,4,5 are all in DRB_prot.txt
+   if(locusToGet %in% c("DRB1","DRB3","DRB4","DRB5")){
+      protfile <- sprintf("alignments/%s_prot.txt", "DRB");
+   } else{
+      protfile <- sprintf("alignments/%s_prot.txt", locusToGet);
+   }
    pf <- unz(description=zipfile, filename=protfile);
    alignment <- readLines(pf);
    close(pf);
 
-   protline <- unlist(strsplit(alignment[8], split=""))
-   # TODO: need to get offset
-   refline <- unlist(strsplit(alignment[10], split=""))
-   startPos_line <- length(protline);
-   startPos_line <- nchar(alignment[8]);
+   protline <- unlist(strsplit(alignment[8], split=""));
+   offset1 <- length(protline);
+   # make sure protline endes in " 1" for expected offsets
+   if( !(protline[offset1]==1) || !(protline[offset1-1]==" ") ){
+      stop(sprintf("bad protline:%s", alignment[8]));
+   }
+
+   #refline <- unlist(strsplit(alignment[10], split=""));
+   #startPos_line <- length(protline);
+   #startPos_line <- nchar(alignment[8]);
    #strsplit(refline, split="")
    #grep(pattern, x, ignore.case = FALSE, perl = FALSE, value = FALSE, fixed = FALSE, useBytes = FALSE, invert = FALSE)
   
@@ -151,15 +183,31 @@ get_padded_seqs_from_alignments <- function(affectedAlleles, controlAlleles, zip
    ref_allele_name <- space_split_ref[2];
    #ref_line_numbers <- grep(ref_allele_name, alignment, fixed=TRUE); # unused
 
-   for(line_number in 1:length(alignment)){
+   # First 9 lines are header information. 
+   # Start scanning allele sequences at line 10, which is the reference allele.
+   for(line_number in 10:length(alignment)){
       aline <- alignment[line_number];
-      newProt <- parse_prot_line(aline);
-      newName <- names(newProt);
-      newSeq <- newProt[[newName]];
+      if( length(grep("Prot", aline, fixed=TRUE)) > 0){ 
+         # if this is another Prot line reset offset.
+         offset1 <- 0;
+      }
+
+      # Skip this line if it doesn't contain locusToGet and is not the referece allele.
+      # eg skip DRB1,3,4 if locusToGet is DRB5
+      # but allow DRB1*01:01:01 (allele from 1st line (line 10) for DRB_prot.txt. It is the reference for DRB3,4,5 also.
+      if( length(grep(locusToGet, aline, fixed=TRUE)) == 0 &&
+          length(grep(ref_allele_name, aline, fixed=TRUE)) == 0 ){
+         next;
+      }
+
+      newProt <- parse_prot_line(aline, offset=offset1);
       if(is.null(newProt)){
          next;
       }
-      if( length(grep(locusToGet, newName, fixed=TRUE)) == 0 ){
+      newName <- names(newProt);
+      newSeq <- newProt[[newName]];
+      if( length(grep(locusToGet, newName, fixed=TRUE)) == 0 &&
+         newName != ref_allele_name){ # allow DRB1*01:01:01 for DRB_prot.txt. It is the reference for DRB3,4,5 also.
          # Don't know what this is, but it doesn't contain the locus.
          next;
       }
@@ -171,15 +219,15 @@ get_padded_seqs_from_alignments <- function(affectedAlleles, controlAlleles, zip
          allAllelesList[[newName]] <- newSeq;
       }
    }
-   # TODO: need to check offset 
-   allAllelesList <- padAllAlleles_andFillFromRef(allAllelesList, ref_allele_name);
+   allAllelesList <- fillFromRef(allAllelesList, ref_allele_name);
+   allAllelesList <- rmDotsX_and0pad(allAllelesList, collapseDots=collapseDots);
    return(allAllelesList);
 }
 
 
 
 
-# just comments and notes on arsing one protein alignment file. 
+# just comments and notes on parsing one protein alignment file. 
 dont_call_parse_prot <- function(protfile="alignments/DPA1_prot.txt", zipfile="../Alignments_Rel_3360.zip"){
 
    # for testing:
