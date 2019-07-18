@@ -138,7 +138,7 @@ printModules <- function(
                                     n_affected=affectedPatients@patientCount,
                                     n_control=controlPatients@patientCount);
       allModules <- rbind(allModules, 
-               cbind(rownames(countsWithPs), positionString, countsWithPs));
+               cbind(Module=rownames(countsWithPs), Positions=positionString, countsWithPs));
       #print(x);
       #countsWithPs <- data.frame(countsWithPs);
       #allModules <- rbind(allModules, countsWithPs);
@@ -302,7 +302,7 @@ addPercentagesAndOR <- function(countMatrix, n_affected, n_control){
       HE <- countMatrix[rowi,"Control"]; # Not effected and exposed
       DN <- n_affected - DE;
       HN <- n_control - HE;
-      OR[rowi] <- (DE*HN) / (DN*HE);
+      OR[rowi] <- signif( ((DE*HN) / (DN*HE)), digits=2);
    }
    return(cbind(countMatrix, "Affected%"=percent_affected, "Control%"=percent_control, OR));
 }
