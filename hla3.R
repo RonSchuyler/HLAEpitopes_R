@@ -670,6 +670,7 @@ get_seq_mat <- function(loci="DR", dataset="copd"){
 
 # Calculate p-values and test for significance with fdr.
 # counts is a 2-column matrix
+# counts may have more than two columns, but expects first 2 to be Affected and Control counts.
 # See two_lists_as_mat() to convert 2 count lists into a 2-column matrix.
 # counts <- get_module_counts(...);
 # Does not actually correct p-values for multiple comparisons.
@@ -677,15 +678,15 @@ p_correct <- function(counts, printAccepted=TRUE, orderByDiff=TRUE, FDR=.05,
                                                 significantFigures=4,
                                                 n_affected=50, n_control=50){
    p_values <- rep(0, nrow(counts));
-   accepted <- rep(0, nrow(counts));
+   Accepted <- rep(0, nrow(counts));
    for(i in 1:length(p_values)){
       p_values[i] <- signif(pvalue_ue2(counts[i,1], counts[i,2], 
                               n_affected=n_affected, n_control=n_control), 
                                                       significantFigures);
    }
    fdri <- fdr_dep_index(p_values, r=FDR);
-   accepted[fdri] <- 1;
-   mat <- cbind(counts, p_values, accepted);
+   Accepted[fdri] <- 1;
+   mat <- cbind(counts, "p-value"=p_values, Accepted);
    colnames(mat)[1] <- "Affected";
    colnames(mat)[2] <- "Control";
    if(orderByDiff && nrow(mat) > 1){

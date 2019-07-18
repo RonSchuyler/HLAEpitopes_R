@@ -128,8 +128,12 @@ printModules <- function(
       Control <- moduleCountHash(controlPatients, locus, posV=posSet, seqMat);
       # Combine the two hashes into a matrix.
       countMatrix <- two_lists_as_mat(Affected, Control);
+      colnames(countMatrix) <- c("Affected", "Control");
+      countMatrixPlus <- addPercentagesAndOR(countMatrix, 
+                                    n_affected=affectedPatients@patientCount,
+                                    n_control=controlPatients@patientCount);
       # Get p-values for individual modules and test for significance.
-      countsWithPs <- p_correct(countMatrix, printAccepted=FALSE, FDR=FDR,
+      countsWithPs <- p_correct(countMatrixPlus, printAccepted=FALSE, FDR=FDR,
                                     significantFigures=p_significantFigures,
                                     n_affected=affectedPatients@patientCount,
                                     n_control=controlPatients@patientCount);
@@ -174,12 +178,12 @@ printModules <- function(
    #if(is.null(dim(allModules))){
      #if(length(allModules) == 8){
          #names(allModules) <- c("Module", "Positions", "Affected", "Control", 
-                                   #"p-value", "Accepted", "Accepted", "p-adj");
+                                   #"p-value", "Accepted", "Accepted2", "p-adj");
       #}
    #}
    #else{
-      colnames(allModules) <- c("Module", "Positions", "Affected", "Control", 
-                                   "p-value", "Accepted", "Accepted", "p-adj");
+   #   colnames(allModules) <- c("Module", "Positions", "Affected", "Control", 
+   #                                "p-value", "Accepted", "Accepted2", "p-adj");
    #}
 
    # Do same for clusters if we have them.
@@ -191,12 +195,12 @@ printModules <- function(
       #if(is.null(dim(allClusters))){
          #if(length(allClusters) == 8){
             #names(allClusters) <-  c("Module", "Positions", "Affected", 
-                        #"Control", "p-value", "Accepted", "Accepted", "p-adj");
+                        #"Control", "p-value", "Accepted", "Accepted2", "p-adj");
          #}
       #}
       #else{
          colnames(allClusters) <- c("Module", "Positions", "Affected", 
-                        "Control", "p-value", "Accepted", "Accepted", "p-adj");
+                        "Control", "p-value", "Accepted", "Accepted2", "p-adj");
       #}
    }
 
@@ -287,6 +291,22 @@ printModules <- function(
    #return(allModules);
 }
 
+# Given a two-column counts matrix: (Affected, Control)
+# add percentages and odds ratio. Return has 3 more columns than input.
+addPercentagesAndOR <- function(countMatrix, n_affected, n_control){
+   percent_affected <- signif((100*countMatrix[,"Affected"] / n_affected), digits=2);
+   percent_control <- signif((100*countMatrix[,"Control"] / n_control), digits=2);
+   OR <- rep(0, nrow(countMatrix));
+   for(rowi in 1:nrow(countMatrix)){
+      DE <- countMatrix[rowi,"Affected"]; # Affected and exposed
+      HE <- countMatrix[rowi,"Control"]; # Not effected and exposed
+      DN <- n_affected - DE;
+      HN <- n_control - HE;
+      OR[rowi] <- (DE*HN) / (DN*HE);
+   }
+   return(cbind(countMatrix, "Affected%"=percent_affected, "Control%"=percent_control, OR));
+}
+
 fdrAndSort <- function(dataMat, FDR=0.05, doSort=TRUE){
    # expected columns in dataMat
    modNameCol <- 1; # module name (character) ex: "QRAA"
@@ -317,10 +337,10 @@ fdrAdjust <- function(dataMat, FDR=0.05, doSort=TRUE, significantFigures=4,
    positionStrCol <- 2; # position string (character) ex: "70,71,72,73"
    affectedCol <- 3; # count of affected 
    controlCol <- 4; # count of control
-   pCol <- 5; # p-values
-   accCol <- 6; # Accepted from previous FDR
-   newAccCol <- 7; # 1 if this row passed cutoff after multiple comp. adjust. 
-   pAdj <- 8; # Fill this with adjusted p-values.
+   pCol <- "p-value"; # was 5, now 8; # p-values
+   accCol <- "Accepted"; # was 6, now 9; # Accepted from previous FDR
+   newAccCol <- "Accepted2"; # was 7, now 10; # 1 if this row passed cutoff after multiple comp. adjust. 
+   pAdj <- "p-adj"; # was 8, now 11; # Fill this with adjusted p-values.
    # This part is modified from the Benjamini & Yekutieli method of p.adjust.
    ps <- as.numeric(dataMat[,pCol]);
    n <- length(ps);
@@ -330,9 +350,9 @@ fdrAdjust <- function(dataMat, FDR=0.05, doSort=TRUE, significantFigures=4,
    q <- sum(1/i);
    adjustedPs <- signif(pmin(1, cummin(q * n/i * ps[o]))[ro], 
                                                          significantFigures);
-   dataMat <- cbind(dataMat, rep(0, n), adjustedPs);
+   dataMat <- cbind(dataMat, "Accepted2"=rep(0, n), "p-adj"=adjustedPs);
    dataMat[(adjustedPs<=FDR), newAccCol] <- 1;
-   # Break the matrix into 2 halves based on wether
+   # Break the matrix into 2 halves based on whether
    # affected or control counts is greater, then sort each half independently
    # on p-values, and recombine the halves.  
    if(doSort){

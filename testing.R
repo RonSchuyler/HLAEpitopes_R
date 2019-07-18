@@ -93,3 +93,7 @@ grep(ds, d07, fixed=TRUE)
 
 # see "not found" in patientMatrix.R
 
+
+ot <- "../Output/aaT1DGCscrubbedhighresdata_DQA1_output2_2019.06.28.100447.txt"
+x <- read.table(ot, header=TRUE, as.is=TRUE);
+
