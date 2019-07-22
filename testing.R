@@ -15,6 +15,7 @@
 
 
  positions <- "45:53"
+ positions <- "28:53"
  positionsTextbox <- eval(parse(text=positions))
    a <- Analysis(locus=locus, dataFile=dataSet, positions=positionsTextbox, 
       FDR=0.05, groupsOfN=2, doCluster=FALSE,  outputToScreen=FALSE,
@@ -54,9 +55,13 @@ slotNames(affectedPatients)
 # ParseAlignments : build seqHash, replace *->0, .->0, - -> reference   DONE
 # see get_padded_seqs()
 
+t0 <- Sys.time();
 seqHashNEW <- get_padded_seqs_from_alignments(affectedAlleles, controlAlleles, zipfile="../Alignments.zip");
+t1 <- Sys.time(); t1-t0
+
 allAllelesList <- get_padded_seqs_from_alignments(affectedAlleles, controlAlleles, zipfile="../Alignments.zip");
 seqMatNEW <- get_hash_values_as_matrix(seqHashNEW);
+
 
 
 

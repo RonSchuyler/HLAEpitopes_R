@@ -18,6 +18,8 @@
 # prot_files <- grep(pattern="_prot.txt$", x=filenames, value=TRUE);
 # Skip this one:  "alignments/ClassI_prot.txt" it is redunant with A, B, C, and less complete (as of version 3360).
 
+# source("hla3.R") for logToFile()
+
 
 # parse_prot_line()
 # Parse a line from the _prot.txt alignment file.
@@ -148,9 +150,9 @@ rmDotsX_and0pad <- function(allAllelesList, collapseDots=TRUE){
 # zipfile from: 
 #   curl -O ftp://ftp.ebi.ac.uk/pub/databases/ipd/imgt/hla/Alignments_Rel_3360.zip
 #   ln -s Alignments_Rel_3360.zip Alignments.zip
-get_padded_seqs_from_alignments <- function(affectedAlleles, controlAlleles, collapseDots=TRUE, zipfile="../Alignments.zip"){
+get_padded_seqs_from_alignments <- function(affectedAlleles, controlAlleles, collapseDots=TRUE, zipfile="../Alignments.zip", logFile="logFile.txt"){
    allAllelesList <- list();
-   alleleNames <- unique( c(names(affectedAlleles), names(controlAlleles)) );
+   alleleNames <- sort( unique( c(names(affectedAlleles), names(controlAlleles)) ) );
 
    locusToGet <- unique(sub("\\*.*$", replacement="", x=alleleNames)); # should only be one, but allow for multiple?
 
@@ -188,7 +190,7 @@ get_padded_seqs_from_alignments <- function(affectedAlleles, controlAlleles, col
    for(line_number in 10:length(alignment)){
       aline <- alignment[line_number];
       if( length(grep("Prot", aline, fixed=TRUE)) > 0){ 
-         # if this is another Prot line reset offset.
+         # if this is another Prot line, reset offset.
          offset1 <- 0;
       }
 
@@ -205,12 +207,12 @@ get_padded_seqs_from_alignments <- function(affectedAlleles, controlAlleles, col
          next;
       }
       newName <- names(newProt);
-      if(!(newName %in% alleleNames) && newName != ref_allele_name){
-         # only get alleles in the current data set.
-         # this requires an exact match.
-         # TODO: ? Many want to get for DRB1*07:01 use DRB1*07:01:01:01 ?
-         next;
-      }
+  #    if(!(newName %in% alleleNames) && newName != ref_allele_name){
+  #       # only get alleles in the current data set.
+  #       # this requires an exact match.
+  #       # TODO: ? Many want to get for DRB1*07:01 use DRB1*07:01:01:01 ?
+  #       next;
+  #    }
       newSeq <- newProt[[newName]];
       if( length(grep(locusToGet, newName, fixed=TRUE)) == 0 &&
          newName != ref_allele_name){ # allow DRB1*01:01:01 for DRB_prot.txt. It is the reference for DRB3,4,5 also.
@@ -225,9 +227,33 @@ get_padded_seqs_from_alignments <- function(affectedAlleles, controlAlleles, col
          allAllelesList[[newName]] <- newSeq;
       }
    }
-   allAllelesList <- fillFromRef(allAllelesList, ref_allele_name);
-   allAllelesList <- rmDotsX_and0pad(allAllelesList, collapseDots=collapseDots);
-   return(allAllelesList);
+
+   # Filter for alleles in our input data.
+   # If we want eg DRB1*07:01 but only have more specific eg DRB1*07:01:01:01, use that.
+   selectedAllelesList <- list();
+   selectedAllelesList[[ref_allele_name]] <- allAllelesList[[ref_allele_name]];
+   availableAlleles <- sort(names(allAllelesList));
+   for(getName in alleleNames){
+      if(getName %in% availableAlleles){
+         # Exact match.
+         selectedAllelesList[[getName]] <- allAllelesList[[getName]];
+         next;
+      }
+      # else look for more sepcific 
+      wg <- grep(getName, availableAlleles, fixed=TRUE);
+      if(length(wg) == 0){ # not found
+         logToFile(logFile, sprintf("Allele %s not found.", getName), echo=TRUE);
+      } else{ 
+         # Pick lowest numbered matching allele. Names were sorted above, so should be first.
+         usingAllele <- availableAlleles[wg[1]];
+         logToFile(logFile, sprintf("Allele %s not found. Using %s", getName, usingAllele), echo=TRUE);
+         selectedAllelesList[[getName]] <- allAllelesList[[usingAllele]];
+      }
+   }
+
+   selectedAllelesList <- fillFromRef(selectedAllelesList, ref_allele_name);
+   selectedAllelesList <- rmDotsX_and0pad(selectedAllelesList, collapseDots=collapseDots);
+   return(selectedAllelesList);
 }
 
 

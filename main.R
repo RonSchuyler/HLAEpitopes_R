@@ -68,6 +68,32 @@ Analysis <- function(
       collapseDotsString <- "_aligned";
    }
 
+   # Set up log file.
+   timestamp <- format(Sys.time(), format="%Y.%m.%d.%H%M%S");
+   inputFileName <- basename(dataFile);
+   fileBaseName <- file_path_sans_ext(inputFileName);
+   # Alleles that are skipped will be logged to this file.
+   #skippedAllelesFile <- sprintf("../output/%s_SkippedAlleles_%s.txt", fileBaseName, this@locus);
+   if(is.null(groupsOfN)){
+      gon <- "All";
+   } else{
+      gon <- as.character(groupsOfN);
+      groupsOfN <- eval(parse(text=groupsOfN));
+   }
+   logFile <- sprintf("../output/%s_%s_output%s_%s.log", fileBaseName, this@locus, gon, timestamp);
+
+   logToFile(logFile, logmessage=sprintf("HLA Epitopes version %s", a.version), firsttime=TRUE);
+   # Log the name of the input data file, the locus, and the allele file used.
+   logToFile(logFile, logmessage=sprintf("Data file: %s", inputFileName), echo=TRUE);
+   logToFile(logFile, logmessage=sprintf("Locus: %s", this@locus), echo=TRUE);
+   logToFile(logFile, logmessage=sprintf("Positions:%s", paste(this@positions,collapse=' ')), echo=TRUE);
+   logToFile(logFile, logmessage=sprintf("Groups of %s",groupsOfN), echo=TRUE);
+
+
+
+
+
+
    # Read the data file into affected and control patient matrices.
    this@affectedPatients <- patientMatrix(dataFile=dataFile, control=FALSE);
    this@controlPatients <- patientMatrix(dataFile=dataFile, control=TRUE);
@@ -95,17 +121,12 @@ Analysis <- function(
 
    # This is the alleles alignment file with aligned sequence data for each allele.
    alignmentsFile <- "../Alignments.zip";
-   this@seqHash <- get_padded_seqs_from_alignments(this@affectedAlleles, this@controlAlleles, collapseDots=collapseDots, zipfile=alignmentsFile);
+   this@seqHash <- get_padded_seqs_from_alignments(this@affectedAlleles, this@controlAlleles, collapseDots=collapseDots, zipfile=alignmentsFile, logFile=logFile);
 
    this@seqMat <- get_hash_values_as_matrix(this@seqHash);
 
    if(is.list(positions) && length(positions) == 2){
-      #inputFileName <- substr(dataFile,9,nchar(dataFile));
-      #fileBaseName <- substr(inputFileName, 1, (nchar(inputFileName)-4));
-      inputFileName <- basename(dataFile);
-      fileBaseName <- file_path_sans_ext(inputFileName);
       #toFile <- sprintf("../output/%s_%s_pattern_%s.txt", fileBaseName, this@locus, paste(unlist(positions), collapse="."));
-      timestamp <- format(Sys.time(), format="%Y.%m.%d.%H%M%S");
       toFile <- sprintf("../output/%s_%s_pattern%s_%s.txt", fileBaseName, this@locus, collapseDotsString, timestamp);
       toFile <- gsub("^","not",toFile,fixed=TRUE);
       toFile <- gsub("[","",toFile,fixed=TRUE);
@@ -139,20 +160,7 @@ Analysis <- function(
                               #groupsOfN=groupsOfN);
 
    # Parse the input file name to build output file names, if necessary.
-   # Previous: Assume input filename is "../data/*.csv"; 6/25/19 Don't assume.
-   #inputFileName <- substr(dataFile,9,nchar(dataFile));
-   #fileBaseName <- substr(inputFileName, 1, (nchar(inputFileName)-4));
-   inputFileName <- basename(dataFile);
-   fileBaseName <- file_path_sans_ext(inputFileName);
    toClusterFile <- c();
-   logFile <- c(); 
-   if(is.null(groupsOfN)){
-      gon <- "All";
-   }
-   else{
-      gon <- as.character(groupsOfN);
-      groupsOfN <- eval(parse(text=groupsOfN));
-   }
 
    if(identical(this@positions, this@polyPos)){
       pos <- "All";
@@ -166,15 +174,12 @@ print("running");
       # This should always be true, now that there is no screen output.
       # All modules output will go to this file.
       #toFile <- sprintf("../output/%s_%s_output%sof%s.txt", fileBaseName, this@locus, gon, pos);
-      timestamp <- format(Sys.time(), format="%Y.%m.%d.%H%M%S");
       toFile <- sprintf("../output/%s_%s_output%s%s_%s.txt", fileBaseName, this@locus, gon, collapseDotsString, timestamp);
       if(awmToFile){
          # This includes all variable positions in file name.
          #awmFileName <- sprintf("../output/AWM_%s_%s_output%sof%s.txt", fileBaseName, this@locus, gon, pos);
          # Name w/o positions if too long:
          #awmFileName <- sprintf("../output/AWM_%s_%s_outputGroupsOf%s.txt", fileBaseName, this@locus, gon);
-         # add timestamp
-         timestamp <- format(Sys.time(), format="%Y.%m.%d.%H%M%S");
          # 10/22/2018: adding alleles to results file, so will ignore this anyway...
          awmFileName <- sprintf("../output/AWM_%s_%s_output%s_%s.txt", fileBaseName, this@locus, gon, timestamp);
       }
@@ -199,18 +204,6 @@ print("running");
    }
 
    this@uiStatusString <- c("Running 3");
-   # Alleles that are skipped will be logged to this file.
-   #skippedAllelesFile <- sprintf("../output/%s_SkippedAlleles_%s.txt", 
-   #   fileBaseName, this@locus);
-   timestamp <- format(Sys.time(), format="%Y.%m.%d.%H%M%S");
-   logFile <- sprintf("../output/%s_%s_output%s_%s.log", fileBaseName, this@locus, gon, timestamp);
-
-   logToFile(logFile, logmessage=sprintf("HLA Epitopes version %s", a.version), firsttime=TRUE);
-   # Log the name of the input data file, the locus, and the allele file used.
-   logToFile(logFile, logmessage=sprintf("Data file: %s", inputFileName), echo=TRUE);
-   logToFile(logFile, logmessage=sprintf("Locus: %s", this@locus), echo=TRUE);
-   logToFile(logFile, logmessage=sprintf("Positions:%s", paste(this@positions,collapse=' ')), echo=TRUE);
-   logToFile(logFile, logmessage=sprintf("Groups of %s",groupsOfN), echo=TRUE);
 
    # Count the number of counted individuals.
    this@affectedPatients@patientCount <- countPatients(this@affectedPatients, 
