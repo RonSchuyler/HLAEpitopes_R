@@ -20,26 +20,27 @@ and rename to Alignments.zip
 (Note that AlleleImport2.txt is no longer used.)
 
 
+
 ### For a new installation
 
 ##### Expected directory structure:
 
 The base directory must contain the Alignments.zip file and subdirectories for input data, output data, and source code.
 
-Data/ - Input data Affected/Control allele list goes here.
+_Data/_ - Input data Affected/Control allele list goes here.
 
-Output/ - Results are found here.
+_Output/_ - Results are found here.
 
-R/ - All source code goes here.
+_R/_ - All source code goes here.
 
-Alignments.zip - Download current allele sequences zip file here: 
+_Alignments.zip_ - Download current allele sequences zip file here: 
 ftp://ftp.ebi.ac.uk/pub/databases/ipd/imgt/hla/
 For example: Alignments_Rel_3370.zip and rename to Alignments.zip
 
 
 
 ##### Install required packages:
-In an R session, type:
+In an R session, paste the following commands:
 ```
 install.packages("gWidgets")
 install.packages("abind")
@@ -47,7 +48,7 @@ install.packages("tools")
 
 ```
 
-for Windows installations only, also install gWidgetsGTK package:
+For Windows installations only, also install gWidgetsGTK package:
 ```
 install.packages("gWidgetsRGtk2")
 ```
