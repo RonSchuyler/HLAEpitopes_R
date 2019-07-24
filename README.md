@@ -5,12 +5,12 @@ HLA epitope association analysis
 ## Installation
 
 
-### To update and existing installation
+### To update an existing installation
 
-##### 1.
+##### 1. Get source code
 Simply download all .R files (git clone https://github.com/RonSchuyler/HLAEpitopes_R/) and move to existing R/ directory.
 
-##### 2.
+##### 2. Get allele sequence data
 Download current allele sequences zip file from: 
 
 ftp://ftp.ebi.ac.uk/pub/databases/ipd/imgt/hla/Alignments_Rel_3370.zip
