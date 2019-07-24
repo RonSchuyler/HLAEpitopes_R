@@ -27,13 +27,13 @@ and rename to Alignments.zip
 
 The base directory must contain the Alignments.zip file and subdirectories for input data, output data, and source code.
 
-_Data/_ - Input data Affected/Control allele list goes here.
+__Data/__ - Input data Affected/Control allele list goes here.
 
-_Output/_ - Results are found here.
+__Output/__ - Results are found here.
 
-_R/_ - All source code goes here.
+__R/__ - All source code goes here.
 
-_Alignments.zip_ - Download current allele sequences zip file here: 
+__Alignments.zip__ - Download current allele sequences zip file here: 
 ftp://ftp.ebi.ac.uk/pub/databases/ipd/imgt/hla/
 For example: Alignments_Rel_3370.zip and rename to Alignments.zip
 
