@@ -18,7 +18,9 @@ ftp://ftp.ebi.ac.uk/pub/databases/ipd/imgt/hla/Alignments_Rel_3370.zip
 and rename to Alignments.zip
 
 (Note that future releases of the Alignments file will be named according to the release version number.) 
+
 (Note that AlleleImport2.txt is no longer used.)
+
 
 
 
