@@ -17,6 +17,7 @@ ftp://ftp.ebi.ac.uk/pub/databases/ipd/imgt/hla/Alignments_Rel_3370.zip
 
 and rename to Alignments.zip
 
+(Note that future releases of the Alignments file will be named according to the release version number.) 
 (Note that AlleleImport2.txt is no longer used.)
 
 
@@ -25,17 +26,18 @@ and rename to Alignments.zip
 
 ##### Expected directory structure:
 
-The base directory must contain the Alignments.zip file and subdirectories for input data, output data, and source code.
+The base directory must contain the __Alignments.zip__ file and subdirectories for input data, output data, and source code.
 
 __Data/__ - Input data Affected/Control allele list goes here.
 
-__Output/__ - Results are found here.
+__Output/__ - Results will be found here.
 
 __R/__ - All source code goes here.
 
 __Alignments.zip__ - Download current allele sequences zip file here: 
 ftp://ftp.ebi.ac.uk/pub/databases/ipd/imgt/hla/
-For example: Alignments_Rel_3370.zip and rename to Alignments.zip
+
+For example: Alignments_Rel_3370.zip  - Rename to Alignments.zip
 
 
 
